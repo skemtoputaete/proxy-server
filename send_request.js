@@ -25,7 +25,7 @@ server.on('request', function(request, response) {
   // Выполняем запрос
   // requestClient - экземпляр класса http.ClientRequest
   var requestClient = http.request(options, (result) => {
-    result.setEncoding('utf8');
+    result.setEncoding('binary');
 
     result.on('data', (chunk) => {
       body += chunk;
@@ -34,7 +34,7 @@ server.on('request', function(request, response) {
     result.on('end', () => {
       console.log("End of request/response.");
       response.writeHead(result.statusCode, result.headers);
-      response.end(body);
+      response.end(body, 'binary');
     });
   });
 
