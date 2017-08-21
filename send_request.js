@@ -7,21 +7,35 @@ server.on('request', function(request, response) {
   // response - экземпляр класса http.ServerResponse
   // request - экземпляр класса http.IncomingMessage
 
-  var denyHosts = ['gipnomag.ru', 'mychell.ru', 'manystars.ru', 'opentests.ru', 'amur-bereg.ru'];
+  // Массив, в котором хранятся сайты, доступ к которым необходимо ограничить
+  var denyHosts = ['gipnomag.ru',
+    'mychell.ru',
+    'manystars.ru',
+    'opentests.ru',
+    'amur-bereg.ru'
+  ];
 
-  var body = "";
+  // В data накапливаться поступающие данные
+  var data = "";
 
   // Парсим запрашиваемый URL
   var requestUrl = url.parse(request.url, true);
 
+  // Проверяем, не пытается ли пользователь получить доступ
+  // к сайтам, посещение которых запрещено
   if (denyHosts.indexOf(requestUrl.hostname) != -1) {
     response.writeHead(301, {
       'Content-Type': 'text/plain',
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'text/html; charset=utf-8'
     });
-    response.end("Access denied.");
+    response.end("Доступ ограничен.", "utf8");
     return;
   }
+
+  // Помещаем в заголовки информацию о том, что
+  // необходимо получать только несжатые данные
+  request.headers['accept-encoding'] = 'identity';
 
   console.log(`Request hostname: ${requestUrl.hostname}`);
 
@@ -34,77 +48,36 @@ server.on('request', function(request, response) {
     headers: request.headers.toString()
   };
 
-  var encoding = "utf8";
-
   // Выполняем запрос
   // requestClient - экземпляр класса http.ClientRequest
   var requestClient = http.request(options, (result) => {
+    // Поступающие данные будут иметь установленную кодировку
+    // Возможные кодировки - binary или utf-8
     result.setEncoding('binary');
 
     result.on('data', (chunk) => {
-
-      var expressionOne = /meta http-equiv="content-type"/i;
-      var expressionTwo = /meta charset/i;
-
-      // В частях ответа ищем заголовки, в которых может быть указана кодировка
-
-      var contentTypeIndex = chunk.search(expressionOne);
-      contentTypeIndex = (contentTypeIndex == -1) ? chunk.search(expressionTwo) : contentTypeIndex;
-
-      // Если он есть, значит, должно быть установлено значение charset
-
-      if (contentTypeIndex != -1) {
-
-        // Ищем позицию, где определяется кодировка
-
-        contentTypeIndex = chunk.indexOf("charset=");
-        if (contentTypeIndex != -1) {
-
-          // Если она найдена, то копируем ее посимвольно в переменную encoding
-
-          var encodingIndex = contentTypeIndex + "charset=".length;
-          encoding = "";
-          while (chunk[encodingIndex] != "\"") {
-            encoding += chunk[encodingIndex];
-            encodingIndex++;
-          }
-        }
-      }
-
-      body += chunk;
+      data += chunk;
     });
 
     result.on('end', () => {
-      var rawHeaders = result.rawHeaders;
+      console.log(`End of request/response with ${requestUrl.hostname.toString()}.`);
 
-      var contentTypeIndex = rawHeaders.indexOf('Content-Type');
-      var contentTypeValue = rawHeaders[contentTypeIndex + 1];
+      // Определяем кодировку поступающих данных
+      var contentTypeIndex = result.rawHeaders.indexOf('Content-Type');
+      var contentTypeValue = result.rawHeaders[contentTypeIndex + 1];
 
-      var imgTypeExpr = /image/i;
-      var textTypeExpr = /text/i;
+      var charsetRes = contentTypeValue.search(/charset=/i);
 
-      var imgTypeRes = contentTypeValue.search(imgTypeExpr);
-      var textTypeRes = contentTypeValue.search(textTypeExpr);
+      var headerEncodingValue = '';
 
-      console.log("End of request/response.");
-
-      response.writeHead(result.statusCode, result.headers);
-
-      if (imgTypeRes != -1) {
-        response.end(body, 'binary');
-        return;
+      if (charsetRes != -1) {
+        headerEncodingValue = contentTypeValue.substring(charsetRes + 'charset='.length);
+      } else {
+        headerEncodingValue = "binary";
       }
 
-      if (textTypeRes != -1) {
-        var headerEncodingIndex = contentTypeValue.indexOf('charset=');
-        if (headerEncodingIndex != -1) {
-          var headerEncodingValue = contentTypeValue.substring(headerEncodingIndex + 'charset='.length);
-          response.end(body, headerEncodingValue);
-          return;
-        }
-      }
-
-      response.end(body, encoding);
+      response.writeHead(result.statusCode, result.headers.toString());
+      response.end(data, headerEncodingValue);
     });
   });
 
