@@ -1,6 +1,14 @@
 var url = require('url');
 var http = require('http');
 
+// Данный массив содержит в себе кодировки, которые поддерживает nodejs
+// Необходим для проверки кодировки, полученной в заголовке ответа
+var supportEncodings = [
+  'utf8', 'utf-8', 'ucs2', 'ucs-2',
+  'utf16le', 'utf-16le', 'latin1', 'binary',
+  'base64', 'ascii', 'hex'
+];
+
 var server = http.createServer();
 
 server.on('request', function(request, response) {
@@ -24,12 +32,15 @@ server.on('request', function(request, response) {
   // Проверяем, не пытается ли пользователь получить доступ
   // к сайтам, посещение которых запрещено
   if (denyHosts.indexOf(requestUrl.hostname) != -1) {
+
     response.writeHead(301, {
       'Content-Type': 'text/plain',
       'Cache-Control': 'no-cache',
       'Content-Type': 'text/html; charset=utf-8'
     });
+
     response.end("Доступ ограничен.", "utf8");
+
     return;
   }
 
@@ -51,9 +62,31 @@ server.on('request', function(request, response) {
   // Выполняем запрос
   // requestClient - экземпляр класса http.ClientRequest
   var requestClient = http.request(options, (result) => {
-    // Поступающие данные будут иметь установленную кодировку
-    // Возможные кодировки - binary или utf-8
-    result.setEncoding("binary");
+
+    // Определяем кодировку поступающих данных
+    var contentTypeIndex = result.rawHeaders.indexOf('Content-Type');
+    var contentTypeValue = result.rawHeaders[contentTypeIndex + 1];
+
+    var charsetRes = contentTypeValue.search(/charset=/i);
+
+    var headerEncodingValue = "";
+
+    if (charsetRes != -1) {
+      headerEncodingValue = contentTypeValue.substring(charsetRes + 'charset='.length).toLowerCase();
+    } else {
+      headerEncodingValue = 'binary';
+    }
+
+    // Необходимо выполнить проверку, поддерживается ли кодировка, переданная
+    // в заголовке ответа от сервера
+    var supported = supportEncodings.indexOf(headerEncodingValue) + 1;
+    // Поступающие данные будут иметь кодировку,
+    // установленную с помощью метода setEncoding
+    if (!supported) {
+      result.setEncoding('binary');
+    } else {
+      result.setEncoding(headerEncodingValue);
+    }
 
     result.on('data', (chunk) => {
       data += chunk;
@@ -61,22 +94,6 @@ server.on('request', function(request, response) {
 
     result.on('end', () => {
       console.log(`End of request/response with ${requestUrl.hostname.toString()}.`);
-
-      // Определяем кодировку поступающих данных
-      var contentTypeIndex = result.rawHeaders.indexOf('Content-Type');
-      var contentTypeValue = result.rawHeaders[contentTypeIndex + 1];
-
-      var charsetRes = contentTypeValue.search(/charset=/i);
-
-      var headerEncodingValue = "";
-
-      if (charsetRes != -1) {
-        headerEncodingValue = contentTypeValue.substring(charsetRes + 'charset='.length);
-      } else {
-        headerEncodingValue = "binary";
-      }
-
-      console.log(`Content-Type encoding was set to ${headerEncodingValue}.`);
 
       response.writeHead(result.statusCode, result.headers);
       response.end(data, headerEncodingValue);
