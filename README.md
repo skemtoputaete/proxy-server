@@ -1,4 +1,3 @@
-=====================
 Simple proxy server
 =====================
 Description of the files in this repository
@@ -22,29 +21,29 @@ This module contains implementation of the rh class.
 
 rh class has the next methods:
 
-1. ```javascript
+1. `javascript
    isHostAllowed
-   ```
+   `
 
   Use it if you want be sure that user of the proxy server don't try to get acces for forbidden sites.
 
-2. ```javascript
+2. `javascript
    requestOptions
-   ```
+   `
 
    Use it for get the right options when using
-   ```javascript
+   `javascript
    http.request
-   ```
+   `
 
-3. ```javascript
+3. `javascript
    contentEncoding
-   ```
+   `
 
    Use it for define the right data encoding.
 
-4. ```javascript
+4. `javascript
    forbidden
-   ```
+   `
 
    Use it for right status code, headers, html answer and answer encoding when user tries to get access for forbidden sites.
