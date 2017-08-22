@@ -8,15 +8,13 @@ server.on('request', function(request, response) {
   // request - экземпляр класса http.IncomingMessage
 
   // Массив, в котором хранятся сайты, доступ к которым необходимо ограничить
-  var denyHosts = ['gipnomag.ru',
-    'mychell.ru',
-    'manystars.ru',
-    'opentests.ru',
-    'amur-bereg.ru'
+  var denyHosts = [
+    'gipnomag.ru', 'mychell.ru', 'manystars.ru',
+    'opentests.ru', 'amur-bereg.ru'
   ];
 
   // В data накапливаться поступающие данные
-  var data = "";
+  var data = '';
 
   // Парсим запрашиваемый URL
   var requestUrl = url.parse(request.url, true);
@@ -24,12 +22,15 @@ server.on('request', function(request, response) {
   // Проверяем, не пытается ли пользователь получить доступ
   // к сайтам, посещение которых запрещено
   if (denyHosts.indexOf(requestUrl.hostname) != -1) {
+
     response.writeHead(301, {
       'Content-Type': 'text/plain',
       'Cache-Control': 'no-cache',
       'Content-Type': 'text/html; charset=utf-8'
     });
-    response.end("Доступ ограничен.", "utf8");
+
+    response.end('<html><head><title>Доступ ограничен</title></head><body>Доступ к запрашиваемому ресурсу ограничен.</body></html>', 'utf8');
+
     return;
   }
 
@@ -37,7 +38,7 @@ server.on('request', function(request, response) {
   // необходимо получать только несжатые данные
   request.headers['accept-encoding'] = 'identity';
 
-  console.log(`Request hostname: ${requestUrl.hostname}`);
+  console.log(`Request hostname: ${requestUrl.hostname}${requestUrl.path}`);
 
   // Формируем необходимые данные для запроса
   var options = {
@@ -53,14 +54,14 @@ server.on('request', function(request, response) {
   var requestClient = http.request(options, (result) => {
     // Поступающие данные будут иметь установленную кодировку
     // Возможные кодировки - binary или utf-8
-    result.setEncoding("binary");
+    result.setEncoding('binary');
 
     result.on('data', (chunk) => {
       data += chunk;
     });
 
     result.on('end', () => {
-      console.log(`End of request/response with ${requestUrl.hostname.toString()}.`);
+      console.log(`End of request/response with ${requestUrl.hostname}${requestUrl.path}.`);
 
       // Определяем кодировку поступающих данных
       var contentTypeIndex = result.rawHeaders.indexOf('Content-Type');
@@ -68,15 +69,13 @@ server.on('request', function(request, response) {
 
       var charsetRes = contentTypeValue.search(/charset=/i);
 
-      var headerEncodingValue = "";
+      var headerEncodingValue = '';
 
       if (charsetRes != -1) {
         headerEncodingValue = contentTypeValue.substring(charsetRes + 'charset='.length);
       } else {
-        headerEncodingValue = "binary";
+        headerEncodingValue = 'binary';
       }
-
-      console.log(`Content-Type encoding was set to ${headerEncodingValue}.`);
 
       response.writeHead(result.statusCode, result.headers);
       response.end(data, headerEncodingValue);
