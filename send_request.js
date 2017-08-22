@@ -23,8 +23,7 @@ server.on('request', function(request, response) {
   // к сайтам, посещение которых запрещено
   if (denyHosts.indexOf(requestUrl.hostname) != -1) {
 
-    response.writeHead(301, {
-      'Content-Type': 'text/plain',
+    response.writeHead(403, {
       'Cache-Control': 'no-cache',
       'Content-Type': 'text/html; charset=utf-8'
     });

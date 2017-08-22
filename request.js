@@ -9,17 +9,17 @@ var supportEncodings = [
   'base64', 'ascii', 'hex'
 ];
 
+// Массив, в котором хранятся сайты, доступ к которым необходимо ограничить
+var denyHosts = [
+  'gipnomag.ru', 'mychell.ru', 'manystars.ru',
+  'opentests.ru', 'amur-bereg.ru'
+];
+
 var server = http.createServer();
 
 server.on('request', function(request, response) {
   // response - экземпляр класса http.ServerResponse
   // request - экземпляр класса http.IncomingMessage
-
-  // Массив, в котором хранятся сайты, доступ к которым необходимо ограничить
-  var denyHosts = [
-    'gipnomag.ru', 'mychell.ru', 'manystars.ru',
-    'opentests.ru', 'amur-bereg.ru'
-  ];
 
   // В data накапливаться поступающие данные
   var data = '';
@@ -31,13 +31,12 @@ server.on('request', function(request, response) {
   // к сайтам, посещение которых запрещено
   if (denyHosts.indexOf(requestUrl.hostname) != -1) {
 
-    response.writeHead(301, {
-      'Content-Type': 'text/plain',
+    response.writeHead(403, {
       'Cache-Control': 'no-cache',
       'Content-Type': 'text/html; charset=utf-8'
     });
 
-    response.end('<html><head><title>Доступ ограничен</title></head><body>Доступ к запрашиваемому ресурсу ограничен.</body></html>', 'utf8');
+    response.end('<html><head><title>Доступ ограничен</title></head><body><h1 align="center">Доступ к запрашиваемому ресурсу ограничен.<h1></body></html>', 'utf8');
 
     return;
   }
