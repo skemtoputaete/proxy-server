@@ -21,29 +21,18 @@ This module contains implementation of the rh class.
 
 rh class has the next methods:
 
-1. `javascript
-   isHostAllowed
-   `
+1. `isHostAllowed`
 
   Use it if you want be sure that user of the proxy server don't try to get acces for forbidden sites.
 
-2. `javascript
-   requestOptions
-   `
+2. `requestOptions`
 
-   Use it for get the right options when using
-   `javascript
-   http.request
-   `
+   Use it for get the right options when using `http.request`
 
-3. `javascript
-   contentEncoding
-   `
+3. `contentEncoding`
 
    Use it for define the right data encoding.
 
-4. `javascript
-   forbidden
-   `
+4. `forbidden`
 
    Use it for right status code, headers, html answer and answer encoding when user tries to get access for forbidden sites.
