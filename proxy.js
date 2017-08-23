@@ -1,4 +1,4 @@
-var rh = require('./request_helper');
+var rh = require('./request-helper');
 var http = require('http');
 
 var requestHelper = new rh();
@@ -15,7 +15,7 @@ server.on('request', function(request, response) {
 
   var data = '';
   var options = requestHelper.requestOptions(request);
-
+  
   console.log(`Request hostname: ${request.url}`);
 
   var requestClient = http.request(options, (result) => {

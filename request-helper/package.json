@@ -1,0 +1,11 @@
+{
+  "name": "request-helper",
+  "version": "1.0.0",
+  "description": "This module uses for http requests.",
+  "main": "request_helper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Maxim Golikov",
+  "license": "ISC"
+}
