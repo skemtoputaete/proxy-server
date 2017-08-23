@@ -51,6 +51,7 @@ server.on('request', function(request, response) {
   // Выполняем запрос
   // requestClient - экземпляр класса http.ClientRequest
   var requestClient = http.request(options, (result) => {
+    // result - экземпляр класса http.IncomingMessage
     // Поступающие данные будут иметь установленную кодировку
     // Возможные кодировки - binary или utf-8
     result.setEncoding('binary');

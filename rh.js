@@ -1,13 +1,3 @@
-// Данный модуль описывает класс rh (request helper)
-// В классе реализованы методы, которые необходимы
-// для выполнения запросов прокси сервера
-
-// Задачи решаемые модулем rh:
-// 1. Формирует необходимые данные для отправки запроса на удаленный сервер
-// 2. Определяет правильную кодировку данных для отправки их обратно клиенту
-//    и для их получения
-// 3. Проверяет доступ к запрашиваемым ресурсам
-
 function rh() {
   this.supportEncodings = [
     'utf8', 'utf-8', 'ucs2', 'ucs-2',
@@ -21,9 +11,6 @@ function rh() {
   this.url = require('url');
 };
 
-// url - свойство url класса http.IncomingMessage
-// return true, если сайт разрешен для посещения
-// return false, в противоположной ситуации
 rh.prototype.isHostAllowed = function(url) {
   var requestUrl = this.url.parse(url, true);
 
@@ -35,8 +22,6 @@ rh.prototype.isHostAllowed = function(url) {
   return true;
 };
 
-// url - свойство url класса http.IncomingMessage
-// Метод возвращает необходимые данные для выполнения запроса
 rh.prototype.requestOptions = function(request) {
   var requestUrl = this.url.parse(request.url, true);
   var requestMethod = request.method;
@@ -55,10 +40,6 @@ rh.prototype.requestOptions = function(request) {
   return options;
 };
 
-// headers - массив rawHeaders
-// Метод возращает 2 кодировки:
-// 1. Используется при получении данных от сервера
-// 2. Используется при отправке данных браузеру
 rh.prototype.contentEncoding = function(headers) {
   var encoding = [];
 
@@ -67,7 +48,6 @@ rh.prototype.contentEncoding = function(headers) {
 
   var charsetRes = contentTypeValue.search(/charset=/i);
 
-  // Определяем кодировку, используемую при отправке данных браузеру
   if (charsetRes != -1) {
     encoding['outgoing'] = contentTypeValue.substring(charsetRes + 'charset='.length).toLowerCase();
   } else {
@@ -76,9 +56,6 @@ rh.prototype.contentEncoding = function(headers) {
 
   encoding['incoming'] = encoding['outgoing'];
 
-  // Если кодировка, используемая для отправки данных браузеру
-  // не поддерживается NodeJS, необходимо определить кодировку
-  // для поступающих от сервера данных
   if (this.supportEncodings.indexOf(encoding['outgoing']) == -1) {
     encoding['incoming'] = 'binary';
   };
