@@ -1,4 +1,4 @@
-function rh() {
+function requestHelper() {
   this.supportEncodings = [
     'utf8', 'utf-8', 'ucs2', 'ucs-2',
     'utf16le', 'utf-16le', 'latin1', 'binary',
@@ -11,7 +11,7 @@ function rh() {
   this.url = require('url');
 };
 
-rh.prototype.isHostAllowed = function(url) {
+requestHelper.prototype.isHostAllowed = function(url) {
   var requestUrl = this.url.parse(url, true);
 
   var hostname = requestUrl.hostname.toString();
@@ -22,7 +22,7 @@ rh.prototype.isHostAllowed = function(url) {
   return true;
 };
 
-rh.prototype.requestOptions = function(request) {
+requestHelper.prototype.requestOptions = function(request) {
   var requestUrl = this.url.parse(request.url, true);
   var requestMethod = request.method;
   var requestHeaders = request.headers;
@@ -40,7 +40,7 @@ rh.prototype.requestOptions = function(request) {
   return options;
 };
 
-rh.prototype.contentEncoding = function(headers) {
+requestHelper.prototype.contentEncoding = function(headers) {
   var encoding = [];
 
   var contentTypeIndex = headers.indexOf('Content-Type');
@@ -63,7 +63,7 @@ rh.prototype.contentEncoding = function(headers) {
   return encoding;
 };
 
-rh.prototype.forbidden = function() {
+requestHelper.prototype.forbidden = function() {
   var result = [];
   result['status-code'] = 403;
   result['headers'] = {
@@ -81,5 +81,5 @@ rh.prototype.forbidden = function() {
   return result;
 };
 
-var requestHelper = new rh();
+// var requestHelper = new requestHelper();
 module.exports = requestHelper;

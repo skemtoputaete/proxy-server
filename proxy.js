@@ -1,24 +1,25 @@
-var rh = require('./rh');
+var rh = require('./request_helper');
 var http = require('http');
 
+var requestHelper = new rh();
 var server = http.createServer();
 
 server.on('request', function(request, response) {
 
-  if (!rh.isHostAllowed(request.url)) {
-    var forbidden = rh.forbidden();
+  if (!requestHelper.isHostAllowed(request.url)) {
+    var forbidden = requestHelper.forbidden();
     response.writeHead(forbidden['status-code'], forbidden['headers']);
     response.end(forbidden['html-answer'], forbidden['encoding']);
     return;
   }
 
   var data = '';
-  var options = rh.requestOptions(request);
+  var options = requestHelper.requestOptions(request);
 
   console.log(`Request hostname: ${request.url}`);
 
   var requestClient = http.request(options, (result) => {
-    var encoding = rh.contentEncoding(result.rawHeaders);
+    var encoding = requestHelper.contentEncoding(result.rawHeaders);
     result.setEncoding(encoding['incoming']);
 
     result.on('data', (chunk) => {
