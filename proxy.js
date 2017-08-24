@@ -1,7 +1,9 @@
+var config = require('config');
 var cluster = require('cluster');
 
 if(cluster.isMaster) {
-  var numCPUs = require('os').cpus().length;
+  // var numCPUs = require('os').cpus().length;
+  var numCPUs = config.get('CPU.cores');
 
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
@@ -19,6 +21,8 @@ if(cluster.isMaster) {
     } else {
       console.log(`Worker ${worker.process.id} successfully exited.`);
     }
+    var time = config.get('CPU.timeout');
+    setTimeout(cluster.fork(), time);
   });
 
 } else {
