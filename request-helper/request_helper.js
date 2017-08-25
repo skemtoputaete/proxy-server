@@ -52,11 +52,11 @@ function requestOptions(request) {
   requestHeaders['accept-encoding'] = 'identity';
 
   var options = {
-    hostname: requestUrl.hostname.toString(),
+    hostname: requestUrl.hostname,
     port: requestUrl.port,
-    path: requestUrl.path.toString(),
-    method: requestMethod.toString(),
-    headers: requestHeaders.toString()
+    path: requestUrl.path,
+    method: requestMethod,
+    headers: requestHeaders
   };
 
   return options;

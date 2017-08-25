@@ -2,3 +2,6 @@ node_modules/
 request-helper/out/
 drafts/
 request-helper/test.js
+test/
+coverage/
+.nyc_output/

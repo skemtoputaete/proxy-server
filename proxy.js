@@ -2,6 +2,10 @@ var config = require('config');
 var cluster = require('cluster');
 
 if(cluster.isMaster) {
+  /**
+   * A varibale contains number of available CPU cores. Value stored in config.
+   * @var {number} numCPUs
+   */
   // var numCPUs = require('os').cpus().length;
   var numCPUs = config.get('CPU.cores');
 
@@ -26,20 +30,19 @@ if(cluster.isMaster) {
   });
 
 } else {
-  var rh = require('./request-helper');
+  var RequestHelper = require('./request-helper');
   var http = require('http');
 
   /**
    * Instance of RequestHelper class
-   * @type {RequestHelper}
+   * @var {RequestHelper} requestHelper
    */
-  var requestHelper = new rh();
+  var requestHelper = new RequestHelper();
   var server = http.createServer();
 
   /**
    * Emitted each time there is a request from client browser to our proxy server.
-   * @event http.Server#request
-   * @callback anonymous function
+   * @listens http.Server#request
    * @param {http.IncomingMessage} request
    * @param {http.ServerResponse} response
    * @see Read in the {@link https://nodejs.org/en/docs/ |NodeJS docs} about class http.Server and his events
@@ -69,19 +72,24 @@ if(cluster.isMaster) {
     /**
      * Send request to the requested by user host.
      * @param {object} options this parameter getting by calling RequestHelper#requestOptions
+     * @param {function(result)} - an anonymous function that gets response of the requested server.
+     result is an instance of http.IncomingMessage class.
      * @return {http.clientRequest} result of calling this method will saved in requestClient variable
-     * @callback anonymous function
-     * @param {http.IncomingMessage} result answer of the requested host
      * @see Read in the {@link https://nodejs.org/en/docs/ |NodeJS docs} about http.request method
      */
     var requestClient = http.request(options, (result) => {
+
+      /**
+       * A variable that contains values of right encodings for incoming and outgoing data.
+       * @var {array} encoding
+       */
       var encoding = requestHelper.contentEncoding(result.rawHeaders);
       result.setEncoding(encoding['incoming']);
 
       /**
-       * Get incoming data from requested server by chanks (parts)
-       * @event http.IncomingMessage#data
-       * @callback anonymous function that accumulates server's answer into variable
+       * Gets incoming data from requested server by chanks (parts) and accumulates it for
+       * sending back to the client's browser.
+       * @listens http.IncomingMessage#data
        * @param {string} chunk part of the answer from requested host
        */
       result.on('data', (chunk) => {
@@ -89,9 +97,8 @@ if(cluster.isMaster) {
       });
 
       /**
-       * Calling when finish sending the request.
-       * @event http.clientRequest#end
-       * @callback anonymous function that sends back data from requested host to the client browser
+       * Emitted when finish sending the request. Sends back data from requested host to the client browser.
+       * @listens http.clientRequest#end
        */
       result.on('end', () => {
         console.log(`End of request/response with ${request.url}.\nWorker ${process.pid}`);
@@ -104,9 +111,17 @@ if(cluster.isMaster) {
       console.log(error);
     });
 
+    /**
+     * @emits http.clientRequest#end
+     */
     requestClient.end();
   });
 
-  server.listen(8080);
-  console.log(`Listen 127.0.0.1:8080.\nWorker ${process.pid}`);
+  /**
+   * A variable contains value of the listened port. Value stored in config file.
+   * @var {number} port
+   */
+  var port = config.get('Proxy.port');
+  server.listen(port);
+  console.log(`Listen 127.0.0.1:${port}.\nWorker ${process.pid}`);
 }

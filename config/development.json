@@ -3,5 +3,8 @@
     "cores": 8,
     "null": 0,
     "timeout": 3000
+  },
+  "Proxy": {
+    "port": 8080
   }
 }

@@ -6,9 +6,11 @@
   "dependencies": {
     "node-static": "^0.7.9"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "nyc": "^11.1.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nyc --reporter=html mocha"
   },
   "repository": {
     "type": "git",
