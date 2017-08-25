@@ -6,7 +6,6 @@ if(cluster.isMaster) {
    * A varibale contains number of available CPU cores. Value stored in config.
    * @var {number} numCPUs
    */
-  // var numCPUs = require('os').cpus().length;
   var numCPUs = config.get('CPU.cores');
 
   for (let i = 0; i < numCPUs; i++) {

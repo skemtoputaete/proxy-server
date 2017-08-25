@@ -7,7 +7,8 @@
     "node-static": "^0.7.9"
   },
   "devDependencies": {
-    "nyc": "^11.1.0"
+    "nyc": "^11.1.0",
+    "supertest": "^3.0.0"
   },
   "scripts": {
     "test": "nyc --reporter=html mocha"
