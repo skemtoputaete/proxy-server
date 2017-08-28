@@ -8,6 +8,8 @@
   },
   "devDependencies": {
     "nyc": "^11.1.0",
+    "request": "^2.81.0",
+    "superagent-proxy": "^1.0.2",
     "supertest": "^3.0.0"
   },
   "scripts": {

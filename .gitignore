@@ -5,3 +5,4 @@ request-helper/test.js
 test/
 coverage/
 .nyc_output/
+test_app/
